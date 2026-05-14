@@ -1,9 +1,24 @@
-const SYSTEM_PROMPT = `You are ScamDetector, an expert fraud analyst. Analyze the content and return ONLY valid JSON — no markdown, no backticks, no preamble. Use this exact schema:
+const SYSTEM_PROMPT = `You are ScamDetector, an expert fraud analyst. Your job is to identify REAL scams — not flag innocent everyday messages.
+
+CRITICAL RULES:
+- A casual greeting like "hey bud", "hi", "how are you", "hello" is ALWAYS SAFE. riskScore 0-5.
+- Normal messages from friends, family, or known services are SAFE.
+- Only flag something as WARNING or DANGER if there are REAL scam signals: requests for money, gift cards, passwords, OTPs, urgent threats, suspicious links, prize claims, impersonation of banks/government, or too-good-to-be-true offers.
+- Short vague messages with NO red flags = SAFE, riskScore under 15.
+- Do NOT invent red flags. If you find nothing suspicious, say it is safe clearly and confidently.
+- Being friendly or casual is NOT a red flag.
+
+riskScore guide:
+0-20 = SAFE (normal everyday message)
+21-50 = WARNING (some suspicious elements but not definitive)
+51-100 = DANGER (clear scam indicators present)
+
+Return ONLY valid JSON — no markdown, no backticks, no preamble:
 {
   "riskLevel": "DANGER" | "WARNING" | "SAFE",
   "riskScore": number 0-100,
   "verdict": "max 6 word title",
-  "summary": "2-3 plain-English sentences, suitable for elderly users",
+  "summary": "2-3 plain-English sentences. If safe, say so clearly and reassuringly. If a scam, explain why simply.",
   "flags": [
     { "type": "danger"|"warning"|"safe", "icon": "tabler-icon-name-without-ti-prefix", "text": "specific observation" }
   ],
@@ -17,22 +32,15 @@ const SYSTEM_PROMPT = `You are ScamDetector, an expert fraud analyst. Analyze th
   },
   "advice": "one clear actionable sentence telling the user what to do"
 }
-Provide 3-5 flags. urlDetails only if analyzing a URL, otherwise set to null.
+Provide 2-4 flags. For SAFE messages, flags should confirm why it looks normal. urlDetails only if analyzing a URL, otherwise set to null.
 Tabler icon names (no ti- prefix): link, mail, alert-triangle, phone, currency-dollar, lock, user, clock, check, world, shield, eye-off, route, device-mobile, at, calendar.
 Use plain language — no jargon. Be direct and specific about what you found.`
 
 export async function scanContent({ type, content, imageData, imageMime }) {
   if (typeof puter === 'undefined') {
-    throw new Error('Puter.js not loaded.')
+    throw new Error('Puter.js not loaded. Make sure the script tag is in index.html.')
   }
 
-  // Sign in to Puter if not already authenticated
-  const isSignedIn = await puter.auth.isSignedIn()
-  if (!isSignedIn) {
-    await puter.auth.signIn()   // opens a Puter sign-in popup
-  }
-
-  // ... rest of your existing code (the messages building + puter.ai.chat call)
   let messages
 
   if (type === 'image') {
@@ -56,12 +64,12 @@ export async function scanContent({ type, content, imageData, imageMime }) {
   }
 
   const resp = await puter.ai.chat(
-  [
-    { role: 'system', content: SYSTEM_PROMPT },
-    ...messages
-  ],
-  { model: 'grok-3-fast' }
-)
+    [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...messages
+    ],
+    { model: 'grok-3-fast' }
+  )
 
   const raw = (resp?.message?.content || resp?.toString() || '')
     .replace(/```json|```/g, '')
