@@ -80,86 +80,76 @@ export default function HomePage() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div style={S.pageHeader}>
+  <div>
+    {/* Header */}
+    <div style={S.pageHeader}>
+      <div>
+        <h1 style={S.pageTitle}>Scan for scams</h1>
+        <p style={S.pageSub}>
+          Paste any message, email, or link — get instant AI analysis
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {!user && isSupabaseReady && (
+          <button style={S.signInBtn} onClick={() => setShowAuth(true)}>
+            <i className="ti ti-user" style={{ fontSize: 14 }} /> Sign in
+          </button>
+        )}
+
+        {history.length > 0 && (
+          <button
+            style={S.historyToggle}
+            onClick={() => setShowHistory(v => !v)}
+          >
+            <i className="ti ti-history" style={{ fontSize: 14 }} />
+            History
+            <span style={S.badge}>{history.length}</span>
+          </button>
+        )}
+
+        <a
+          href="https://github.com/yashieeeeee/scamdetector/raw/main/extension.zip"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={S.signInBtn}
+        >
+          <i className="ti ti-puzzle" style={{ fontSize: 14 }} />
+          Add to Chrome
+        </a>
+      </div>
+    </div>
+
+    <div style={S.configBanner}>
+      <i
+        className="ti ti-brand-puter"
+        style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}
+      />
+      <div>
+        <strong>Free AI powered by Puter.</strong> You'll be asked to sign in
+        with a free Puter account on your first scan.
+      </div>
+    </div>
+
+    {/* Config warning */}
+    {!isSupabaseReady && (
+      <div style={S.configBanner}>
+        <i
+          className="ti ti-settings"
+          style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}
+        />
         <div>
-          <h1 style={S.pageTitle}>Scan for scams</h1>
-          <p style={S.pageSub}>Paste any message, email, or link — get instant AI analysis</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {!user && isSupabaseReady && (
-            <button style={S.signInBtn} onClick={() => setShowAuth(true)}>
-              <i className="ti ti-user" style={{ fontSize: 14 }} /> Sign in
-            </button>
-          )}
-          {history.length > 0 && (
-            <button style={S.historyToggle} onClick={() => setShowHistory(v => !v)}>
-              <i className="ti ti-history" style={{ fontSize: 14 }} />
-              History
-              <span style={S.badge}>{history.length}</span>
-            </button>
-          )}
-        
+          <strong>Supabase not configured.</strong> Copy{' '}
+          <code style={S.code}>.env.example</code> to{' '}
+          <code style={S.code}>.env</code> and add your credentials to enable
+          sign-in and history sync.
         </div>
       </div>
-      <div style={S.configBanner}>
-  <i className="ti ti-brand-puter" style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }} />
-  <div>
-    <strong>Free AI powered by Puter.</strong> You'll be asked to sign in with a free Puter account on your first scan.
+    )}
+
+    {/* Rest of your existing JSX continues here... */}
   </div>
-</div>
-      {/* Config warning */}
-      {!isSupabaseReady && (
-        <div style={S.configBanner}>
-          <i className="ti ti-settings" style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }} />
-          <div>
-            <strong>Supabase not configured.</strong> Copy <code style={S.code}>.env.example</code> to <code style={S.code}>.env</code> and add your credentials to enable sign-in and history sync.
-          </div>
-        </div>
-      )}
-
-      {/* Sync banner */}
-      {user && (
-        <div style={S.syncBanner}>
-          <i className="ti ti-cloud-check" style={{ fontSize: 15 }} />
-          Signed in as <strong>{user.email}</strong> — history syncing across devices
-        </div>
-      )}
-
-      {/* History */}
-      {showHistory && history.length > 0 && (
-        <HistoryPanel
-          history={history}
-          onSelect={handleSelectHistory}
-          onClear={handleClearHistory}
-          isSynced={!!user}
-        />
-      )}
-
-      {/* Scan input */}
-      <ScanInput onScan={handleScan} loading={loading} />
-
-      {/* Error */}
-      {error && (
-        <div style={S.errorCard}>
-          <i className="ti ti-alert-circle" style={{ fontSize: 18 }} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {/* Result */}
-      {result && <ScanResult result={result} onReset={() => setResult(null)} />}
-
-      {/* Auth modal */}
-      {showAuth && (
-        <AuthModal
-          onClose={() => setShowAuth(false)}
-          onSkip={() => { setShowAuth(false); setSkipped(true) }}
-        />
-      )}
-    </div>
-  )
+)
 }
 
 const S = {
