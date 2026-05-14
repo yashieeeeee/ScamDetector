@@ -80,83 +80,103 @@ export default function HomePage() {
   }
 
   return (
-  <div>
-    {/* Header */}
-    <div style={S.pageHeader}>
-      <div>
-        <h1 style={S.pageTitle}>Scan for scams</h1>
-        <p style={S.pageSub}>
-          Paste any message, email, or link — get instant AI analysis
-        </p>
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {!user && isSupabaseReady && (
-          <button style={S.signInBtn} onClick={() => setShowAuth(true)}>
-            <i className="ti ti-user" style={{ fontSize: 14 }} /> Sign in
-          </button>
-        )}
-
-        {history.length > 0 && (
-          <button
-            style={S.historyToggle}
-            onClick={() => setShowHistory(v => !v)}
-          >
-            <i className="ti ti-history" style={{ fontSize: 14 }} />
-            History
-            <span style={S.badge}>{history.length}</span>
-          </button>
-        )}
-
-        <a
-          href="https://github.com/yashieeeeee/scamdetector/raw/main/extension.zip"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={S.signInBtn}
-        >
-          <i className="ti ti-puzzle" style={{ fontSize: 14 }} />
-          Add to Chrome
-        </a>
-      </div>
-    </div>
-
-    <div style={S.configBanner}>
-      <i
-        className="ti ti-brand-puter"
-        style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}
-      />
-      <div>
-        <strong>Free AI powered by Puter.</strong> You'll be asked to sign in
-        with a free Puter account on your first scan.
-      </div>
-    </div>
-
-    {/* Config warning */}
-    {!isSupabaseReady && (
-      <div style={S.configBanner}>
-        <i
-          className="ti ti-settings"
-          style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}
-        />
+    <div>
+      {/* Header */}
+      <div style={S.pageHeader}>
         <div>
-          <strong>Supabase not configured.</strong> Copy{' '}
-          <code style={S.code}>.env.example</code> to{' '}
-          <code style={S.code}>.env</code> and add your credentials to enable
-          sign-in and history sync.
+          <h1 style={S.pageTitle}>Scan for scams</h1>
+          <p style={S.pageSub}>Paste any message, email, or link — get instant AI analysis</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {!user && isSupabaseReady && (
+            <button style={S.signInBtn} onClick={() => setShowAuth(true)}>
+              <i className="ti ti-user" style={{ fontSize: 14 }} /> Sign in
+            </button>
+          )}
+          {history.length > 0 && (
+            <button style={S.historyToggle} onClick={() => setShowHistory(v => !v)}>
+              <i className="ti ti-history" style={{ fontSize: 14 }} />
+              History
+              <span style={S.badge}>{history.length}</span>
+            </button>
+          )}
+          <a
+            href="https://github.com/YOUR_USERNAME/scamdetector/raw/main/extension.zip"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={S.signInBtn}
+          >
+            <i className="ti ti-puzzle" style={{ fontSize: 14 }} /> Add to Chrome
+          </a>
         </div>
       </div>
-    )}
 
-    {/* Rest of your existing JSX continues here... */}
-  </div>
-)
+      {/* Puter banner */}
+      <div style={S.configBanner}>
+        <i className="ti ti-brand-puter" style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }} />
+        <div>
+          <strong>Free AI powered by Puter.</strong> You'll be asked to sign in with a free Puter account on your first scan.
+        </div>
+      </div>
+
+      {/* Config warning */}
+      {!isSupabaseReady && (
+        <div style={S.configBanner}>
+          <i className="ti ti-settings" style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }} />
+          <div>
+            <strong>Supabase not configured.</strong> Copy <code style={S.code}>.env.example</code> to <code style={S.code}>.env</code> and add your credentials to enable sign-in and history sync.
+          </div>
+        </div>
+      )}
+
+      {/* Sync banner */}
+      {user && (
+        <div style={S.syncBanner}>
+          <i className="ti ti-cloud-check" style={{ fontSize: 15 }} />
+          Signed in as <strong>{user.email}</strong> — history syncing across devices
+        </div>
+      )}
+
+      {/* History */}
+      {showHistory && history.length > 0 && (
+        <HistoryPanel
+          history={history}
+          onSelect={handleSelectHistory}
+          onClear={handleClearHistory}
+          isSynced={!!user}
+        />
+      )}
+
+      {/* Scan input */}
+      <ScanInput onScan={handleScan} loading={loading} />
+
+      {/* Error */}
+      {error && (
+        <div style={S.errorCard}>
+          <i className="ti ti-alert-circle" style={{ fontSize: 18 }} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Result */}
+      {result && <ScanResult result={result} onReset={() => setResult(null)} />}
+
+      {/* Auth modal */}
+      {showAuth && (
+        <AuthModal
+          onClose={() => setShowAuth(false)}
+          onSkip={() => { setShowAuth(false); setSkipped(true) }}
+        />
+      )}
+    </div>
+  )
 }
 
 const S = {
   pageHeader: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem', gap: 12, flexWrap: 'wrap' },
   pageTitle: { fontSize: 24, fontWeight: 600, color: '#1a1a18', letterSpacing: '-0.3px' },
   pageSub: { fontSize: 14, color: '#888', marginTop: 3 },
-  signInBtn: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, padding: '6px 12px', borderRadius: 8, border: '0.5px solid rgba(0,0,0,0.12)', background: '#fff', color: '#555', cursor: 'pointer' },
+  signInBtn: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, padding: '6px 12px', borderRadius: 8, border: '0.5px solid rgba(0,0,0,0.12)', background: '#fff', color: '#555', cursor: 'pointer', textDecoration: 'none' },
   historyToggle: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, padding: '6px 12px', borderRadius: 8, border: '0.5px solid rgba(0,0,0,0.12)', background: '#fff', color: '#555', cursor: 'pointer' },
   badge: { background: '#E24B4A', color: '#fff', fontSize: 10, fontWeight: 500, minWidth: 17, height: 17, borderRadius: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' },
   configBanner: { display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 14px', background: '#FFF8E6', border: '0.5px solid #F5D97A', borderRadius: 8, marginBottom: '1rem', fontSize: 13, color: '#7A5800' },
