@@ -8,6 +8,8 @@ import HistoryPanel from '../components/HistoryPanel'
 import AuthModal from '../components/AuthModal'
 import { isSupabaseReady } from '../lib/supabase'
 
+
+
 export default function HomePage() {
   const { user } = useAuth()
   const [result, setResult]         = useState(null)
@@ -36,6 +38,7 @@ export default function HomePage() {
     }
   }, [user])
 
+  
   async function handleScan({ type, content, imageData, imageMime }) {
     setLoading(true)
     setError('')
@@ -97,6 +100,7 @@ export default function HomePage() {
               <span style={S.badge}>{history.length}</span>
             </button>
           )}
+        
         </div>
       </div>
       <div style={S.configBanner}>
