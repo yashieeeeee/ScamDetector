@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "ScamDetector",
+  "version": "1.0",
+  "description": "Paste any message, email, or link and instantly know if it's a scam.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": []
+}
